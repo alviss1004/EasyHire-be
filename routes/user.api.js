@@ -5,13 +5,8 @@ const {
   getUsers,
   getUserById,
 } = require("../controllers/user.controller.js");
-
-/**
- * @route GET API/users
- * @description Get a list of users
- * @access private
- */
-router.get("/", getUsers);
+const { body } = require("express-validator");
+const validators = require("../middlewares/validators.js");
 
 /**
  * @route POST /users
@@ -19,7 +14,25 @@ router.get("/", getUsers);
  * @body {name, email, password}
  * @access public
  */
-router.post("/", register);
+router.post(
+  "/",
+  validators.validate([
+    body("name", "Invalid name").exists().notEmpty(),
+    body("email", "Invalid email")
+      .exists()
+      .isEmail()
+      .normalizeEmail({ gmail_remove_dots: false }),
+    body("password", "Invalid password").exists().notEmpty(),
+  ]),
+  register
+);
+
+/**
+ * @route GET API/users
+ * @description Get a list of users
+ * @access private
+ */
+router.get("/", getUsers);
 
 /**
  * @route GET api/users/:id

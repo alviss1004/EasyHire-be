@@ -2,7 +2,20 @@ const mongoose = require("mongoose");
 //Create schema
 const jobSchema = mongoose.Schema(
   {
-    isDeleted: { type: Boolean, default: false, select: false },
+    lister: { type: mongoose.SchemaTypes.ObjectId, ref: "User" },
+    title: { type: String, require: true },
+    industry: { type: String, require: true },
+    description: { type: String, require: true },
+    imageUrl: { type: String, require: false, default: "" },
+    status: {
+      type: String,
+      enum: ["bidding", "ongoing", "finished"],
+      default: "bidding",
+      require: true,
+    },
+    bids: [{ type: mongoose.SchemaTypes.ObjectId, ref: "Bid" }],
+
+    bidCount: { type: Number, default: 0 },
   },
   {
     timestamps: true,
