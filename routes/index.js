@@ -8,7 +8,7 @@ router.get("/", function (req, res, next) {
 
 //authApi
 const authApi = require("./auth.api");
-router.use("/auths", authApi);
+router.use("/auth", authApi);
 
 //userApi
 const userApi = require("./user.api");

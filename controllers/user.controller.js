@@ -31,4 +31,13 @@ userController.register = catchAsync(async (req, res, next) => {
   );
 });
 
+userController.getFreelancers = catchAsync(async (req, res, next) => {
+  //Business Logic Validation
+
+  //Process
+
+  //Response
+  sendResponse(res, 200, true, { users }, null, "Get freelancers successfully");
+});
+
 module.exports = userController;
