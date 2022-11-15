@@ -32,12 +32,103 @@ userController.register = catchAsync(async (req, res, next) => {
 });
 
 userController.getFreelancers = catchAsync(async (req, res, next) => {
-  //Business Logic Validation
+  //Get data from request
+  let { page, limit } = req.query;
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
 
-  //Process
+  //Business Logic Validation & Process
+  const count = await User.countDocuments({ isFreelancer: true });
+  const offset = limit * (page - 1);
+  const totalPages = Math.ceil(count / limit);
+
+  let freelancers = await User.find({ isFreelancer: true })
+    .sort({ createdAt: -1 })
+    .skip(offset)
+    .limit(limit);
+  if (!freelancers)
+    throw new AppError(400, "No freelancer found", "Get freelancers error");
 
   //Response
-  sendResponse(res, 200, true, { users }, null, "Get freelancers successfully");
+  sendResponse(
+    res,
+    200,
+    true,
+    { freelancers, totalPages, count },
+    null,
+    "Get freelancers successfully"
+  );
+});
+
+userController.getMyProfile = catchAsync(async (req, res, next) => {
+  //Get data from request
+  const currentUserId = req.userId;
+  //Business Logic Validation
+  const user = await User.findById(currentUserId);
+  if (!user)
+    throw new AppError(400, "User not found", "Get current user error");
+
+  //Response
+  sendResponse(res, 200, true, { user }, null, "Get current user successfully");
+});
+
+userController.getSingleUser = catchAsync(async (req, res, next) => {
+  //Get data from request
+  const userId = req.params.id;
+  //Business Logic Validation
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(400, "User not found", "Get single user error");
+
+  //Response
+  sendResponse(res, 200, true, { user }, null, "Get single user successfully");
+});
+
+userController.getUserBids = catchAsync(async (req, res, next) => {
+  //Get data from request
+  const userId = req.params.id;
+  //Business Logic Validation
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(400, "User not found", "Get User Bids Error");
+
+  const userBids = user.bids;
+
+  //Response
+  sendResponse(
+    res,
+    200,
+    true,
+    { userBids },
+    null,
+    "Get user bids successfully"
+  );
+});
+
+userController.updateProfile = catchAsync(async (req, res, next) => {
+  //Get data from request
+  const currentUserId = req.userId;
+  const userId = req.params.id;
+  //Business Logic Validation
+  if (currentUserId !== userId)
+    throw new AppError(400, "Permission required", "Update User Error");
+  let user = await User.findById(userId);
+  if (!user) throw new AppError(400, "User not found", "Update User Error");
+  //Process
+  const allows = [
+    "isFreelancer",
+    "avatarUrl",
+    "aboutMe",
+    "company",
+    "industry",
+    "skills",
+  ];
+  allows.forEach((field) => {
+    if (req.body[field] !== undefined) {
+      user[field] = req.body[field];
+    }
+  });
+  await user.save();
+  //Response
+  sendResponse(res, 200, true, { user }, null, "Update profile successfully");
 });
 
 module.exports = userController;

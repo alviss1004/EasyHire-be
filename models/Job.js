@@ -2,7 +2,11 @@ const mongoose = require("mongoose");
 //Create schema
 const jobSchema = mongoose.Schema(
   {
-    lister: { type: mongoose.SchemaTypes.ObjectId, ref: "User" },
+    lister: {
+      type: mongoose.SchemaTypes.ObjectId,
+      required: true,
+      ref: "User",
+    },
     title: { type: String, require: true },
     industry: { type: String, require: true },
     description: { type: String, require: true },
@@ -13,7 +17,9 @@ const jobSchema = mongoose.Schema(
       default: "bidding",
       require: true,
     },
+    assignee: { type: mongoose.SchemaTypes.ObjectId, ref: "User" },
     bids: [{ type: mongoose.SchemaTypes.ObjectId, ref: "Bid" }],
+    reviews: [{ type: mongoose.SchemaTypes.ObjectId, ref: "Review" }],
 
     bidCount: { type: Number, default: 0 },
   },

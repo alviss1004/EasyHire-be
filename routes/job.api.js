@@ -6,7 +6,7 @@ const {} = require("../controllers/job.controller.js");
 
 /**
  * @route GET /jobs?page=1&limit=10
- * @description Get job list with pagination
+ * @description Get job list with pagination with skills, industry query
  * @body
  * @access public
  */

@@ -2,8 +2,16 @@ const mongoose = require("mongoose");
 //Create schema
 const bidSchema = mongoose.Schema(
   {
-    bidder: { type: mongoose.SchemaTypes.ObjectId, ref: "User" },
-    targetJob: { type: mongoose.SchemaTypes.ObjectId, ref: "Job" },
+    bidder: {
+      type: mongoose.SchemaTypes.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    targetJob: {
+      type: mongoose.SchemaTypes.ObjectId,
+      required: true,
+      ref: "Job",
+    },
     price: { type: Number, require: true },
     status: {
       type: String,

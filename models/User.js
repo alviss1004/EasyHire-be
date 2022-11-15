@@ -16,6 +16,8 @@ const userSchema = mongoose.Schema(
     industry: { type: String, required: false, default: "" },
     skills: [{ type: String, required: false, default: "" }],
 
+    bids: [{ type: mongoose.SchemaTypes.ObjectId, ref: "Bid" }],
+
     isDeleted: { type: Boolean, default: false, select: false },
     reviewCount: { type: Number, default: 0 },
   },

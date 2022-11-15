@@ -3,9 +3,14 @@ const router = express.Router();
 const {
   register,
   getFreelancers,
+  getMyProfile,
+  getSingleUser,
+  getUserBids,
+  updateProfile,
 } = require("../controllers/user.controller.js");
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const validators = require("../middlewares/validators.js");
+const authentication = require("../middlewares/authentication.js");
 
 /**
  * @route POST /users
@@ -27,8 +32,8 @@ router.post(
 );
 
 /**
- * @route GET /users/freelancers
- * @description Get all users with the freelancer role
+ * @route GET /users/freelancers?page=1&limit=10
+ * @description Get all users with the freelancer role with pagination
  * @body
  * @access public
  */
@@ -40,6 +45,7 @@ router.get("/freelancers", getFreelancers);
  * @body
  * @access login required
  */
+router.get("/me", authentication.loginRequired, getMyProfile);
 
 /**
  * @route GET /users/:id
@@ -47,6 +53,14 @@ router.get("/freelancers", getFreelancers);
  * @body
  * @access login required
  */
+router.get(
+  "/:id",
+  authentication.loginRequired,
+  validators.validate([
+    param("id").exists().isString().custom(validators.checkObjectId),
+  ]),
+  getSingleUser
+);
 
 /**
  * @route GET /users/:id/bids
@@ -54,13 +68,29 @@ router.get("/freelancers", getFreelancers);
  * @body
  * @access login required
  */
+router.get(
+  "/:id/bids",
+  authentication.loginRequired,
+  validators.validate([
+    param("id").exists().isString().custom(validators.checkObjectId),
+  ]),
+  getUserBids
+);
 
 /**
  * @route PUT /users/:id
  * @description Update user profile
- * @body {name, role, industry, company, skills, avatarUrl, about me}
+ * @body {name, isFreelancer, industry, company, skills, avatarUrl, about me}
  * @access login required
  */
+router.put(
+  "/:id",
+  authentication.loginRequired,
+  validators.validate([
+    param("id").exists().isString().custom(validators.checkObjectId),
+  ]),
+  updateProfile
+);
 
 //export
 module.exports = router;
