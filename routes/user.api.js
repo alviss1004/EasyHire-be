@@ -5,7 +5,7 @@ const {
   getFreelancers,
   getMyProfile,
   getSingleUser,
-  getUserBids,
+  getCurrentUserBids,
   updateProfile,
 } = require("../controllers/user.controller.js");
 const { body, param } = require("express-validator");
@@ -63,18 +63,18 @@ router.get(
 );
 
 /**
- * @route GET /users/:id/bids
+ * @route GET /users/me/bids
  * @description Get all bids of current user
  * @body
  * @access login required
  */
 router.get(
-  "/:id/bids",
+  "/me/bids",
   authentication.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
   ]),
-  getUserBids
+  getCurrentUserBids
 );
 
 /**

@@ -21,7 +21,7 @@ userController.register = catchAsync(async (req, res, next) => {
   const accessToken = await user.generateToken();
 
   //Response
-  sendResponse(
+  return sendResponse(
     res,
     200,
     true,
@@ -50,7 +50,7 @@ userController.getFreelancers = catchAsync(async (req, res, next) => {
     throw new AppError(400, "No freelancer found", "Get freelancers error");
 
   //Response
-  sendResponse(
+  return sendResponse(
     res,
     200,
     true,
@@ -69,7 +69,14 @@ userController.getMyProfile = catchAsync(async (req, res, next) => {
     throw new AppError(400, "User not found", "Get current user error");
 
   //Response
-  sendResponse(res, 200, true, { user }, null, "Get current user successfully");
+  return sendResponse(
+    res,
+    200,
+    true,
+    { user },
+    null,
+    "Get current user successfully"
+  );
 });
 
 userController.getSingleUser = catchAsync(async (req, res, next) => {
@@ -80,20 +87,27 @@ userController.getSingleUser = catchAsync(async (req, res, next) => {
   if (!user) throw new AppError(400, "User not found", "Get single user error");
 
   //Response
-  sendResponse(res, 200, true, { user }, null, "Get single user successfully");
+  return sendResponse(
+    res,
+    200,
+    true,
+    { user },
+    null,
+    "Get single user successfully"
+  );
 });
 
-userController.getUserBids = catchAsync(async (req, res, next) => {
+userController.getCurrentUserBids = catchAsync(async (req, res, next) => {
   //Get data from request
-  const userId = req.params.id;
+  const currentUserId = req.userId;
   //Business Logic Validation
-  const user = await User.findById(userId);
+  const user = await User.findById(currentUserId);
   if (!user) throw new AppError(400, "User not found", "Get User Bids Error");
 
   const userBids = user.bids;
 
   //Response
-  sendResponse(
+  return sendResponse(
     res,
     200,
     true,
@@ -128,7 +142,14 @@ userController.updateProfile = catchAsync(async (req, res, next) => {
   });
   await user.save();
   //Response
-  sendResponse(res, 200, true, { user }, null, "Update profile successfully");
+  return sendResponse(
+    res,
+    200,
+    true,
+    { user },
+    null,
+    "Update profile successfully"
+  );
 });
 
 module.exports = userController;

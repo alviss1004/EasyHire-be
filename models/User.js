@@ -19,6 +19,7 @@ const userSchema = mongoose.Schema(
     bids: [{ type: mongoose.SchemaTypes.ObjectId, ref: "Bid" }],
 
     isDeleted: { type: Boolean, default: false, select: false },
+    jobListingCount: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },
   },
   {

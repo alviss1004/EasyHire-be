@@ -2,14 +2,22 @@ const express = require("express");
 const router = express.Router();
 const { body } = require("express-validator");
 const validators = require("../middlewares/validators.js");
-const {} = require("../controllers/job.controller.js");
+const {
+  getJobs,
+  getJobDetail,
+  getJobBids,
+  createJob,
+  updateJob,
+  deleteJob,
+} = require("../controllers/job.controller.js");
 
 /**
  * @route GET /jobs?page=1&limit=10
- * @description Get job list with pagination with skills, industry query
+ * @description Get job list with pagination and skills/industry in query (optional)
  * @body
  * @access public
  */
+router.get("/", getJobs);
 
 /**
  * @route GET /jobs/:id
@@ -17,6 +25,14 @@ const {} = require("../controllers/job.controller.js");
  * @body
  * @access login required
  */
+router.get(
+  "/:id",
+  authentication.loginRequired,
+  validators.validate([
+    param("id").exists().isString().custom(validators.checkObjectId),
+  ]),
+  getJobDetail
+);
 
 /**
  * @route GET /jobs/:id/bids
@@ -24,20 +40,46 @@ const {} = require("../controllers/job.controller.js");
  * @body
  * @access login required
  */
+router.get(
+  "/:id/bids",
+  authentication.loginRequired,
+  validators.validate([
+    param("id").exists().isString().custom(validators.checkObjectId),
+  ]),
+  getJobBids
+);
 
 /**
  * @route POST /jobs
  * @description List a new job
- * @body {title, industry, description, image}
+ * @body {title, industry, description, skills, image}
  * @access login required
  */
+router.post(
+  "/",
+  authentication.loginRequired,
+  validators.validate([
+    body("title", "Invalid title").exists().notEmpty(),
+    body("industry", "Invalid industry").exists().notEmpty(),
+    body("description", "Invalid description").exists().notEmpty(),
+  ]),
+  createJob
+);
 
 /**
  * @route PUT /jobs/:id
  * @description Edit a listed job
- * @body {title, industry, description, image}
+ * @body {title, industry, description, skills, image}
  * @access login required
  */
+router.put(
+  "/:id",
+  authentication.loginRequired,
+  validators.validate([
+    param("id").exists().isString().custom(validators.checkObjectId),
+  ]),
+  updateJob
+);
 
 /**
  * @route DELETE /jobs/:id
@@ -45,6 +87,14 @@ const {} = require("../controllers/job.controller.js");
  * @body
  * @access login required
  */
+router.delete(
+  "/:id",
+  authentication.loginRequired,
+  validators.validate([
+    param("id").exists().isString().custom(validators.checkObjectId),
+  ]),
+  deleteJob
+);
 
 //export
 module.exports = router;
