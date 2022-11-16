@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const validators = require("../middlewares/validators.js");
 const {
   getJobs,
@@ -10,6 +10,7 @@ const {
   updateJob,
   deleteJob,
 } = require("../controllers/job.controller.js");
+const authentication = require("../middlewares/authentication.js");
 
 /**
  * @route GET /jobs?page=1&limit=10

@@ -7,7 +7,7 @@ const validators = {};
 validators.validate = (validationArray) => async (req, res, next) => {
   await Promise.all(validationArray.map((validation) => validation.run(req)));
   const errors = validationResult(req);
-  if (error.isEmpty()) return next();
+  if (errors.isEmpty()) return next();
 
   const message = errors
     .array()
@@ -17,6 +17,7 @@ validators.validate = (validationArray) => async (req, res, next) => {
   return sendResponse(res, 422, false, null, { message }, "Validation Error");
 };
 
+//Check if id param is a valid objectId
 validators.checkObjectId = (paramId) => {
   if (!mongoose.Types.ObjectId.isValid(paramId)) {
     throw new Error("Invalid ObjectId");

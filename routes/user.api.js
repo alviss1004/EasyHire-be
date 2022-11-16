@@ -7,6 +7,7 @@ const {
   getSingleUser,
   getCurrentUserBids,
   updateProfile,
+  deleteUser,
 } = require("../controllers/user.controller.js");
 const { body, param } = require("express-validator");
 const validators = require("../middlewares/validators.js");
@@ -90,6 +91,21 @@ router.put(
     param("id").exists().isString().custom(validators.checkObjectId),
   ]),
   updateProfile
+);
+
+/**
+ * @route DELETE /users/:id
+ * @description Delete user account
+ * @body
+ * @access login required
+ */
+router.delete(
+  "/:id",
+  authentication.loginRequired,
+  validators.validate([
+    param("id").exists().isString().custom(validators.checkObjectId),
+  ]),
+  deleteUser
 );
 
 //export

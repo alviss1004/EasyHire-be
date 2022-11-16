@@ -1,8 +1,8 @@
-const { sendResponse, AppError } = require("../helpers/utils.js");
+const { sendResponse, AppError, catchAsync } = require("../helpers/utils.js");
 const mongoose = require("mongoose");
-var ObjectId = require("mongoose").Types.ObjectId;
 const Job = require("../models/Job");
 const User = require("../models/User");
+const Bid = require("../models/Bid");
 
 const jobController = {};
 
@@ -94,10 +94,8 @@ jobController.getJobBids = catchAsync(async (req, res, next) => {
   //Get data from request
   const jobId = req.params.id;
   //Business Logic Validation
-  const job = await Job.findById(jobId);
-  if (!job) throw new AppError(400, "Job not found", "Get Job Bids Error");
-
-  const jobBids = job.bids;
+  const jobBids = await Bid.find({ targetJob: jobId }).sort({ price: -1 });
+  if (!jobBids) throw new AppError(400, "No bids found", "Get Job Bids Error");
 
   //Response
   return sendResponse(

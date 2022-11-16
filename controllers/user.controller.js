@@ -1,6 +1,5 @@
 const { sendResponse, AppError, catchAsync } = require("../helpers/utils.js");
 const mongoose = require("mongoose");
-var ObjectId = require("mongoose").Types.ObjectId;
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 
@@ -8,7 +7,7 @@ const userController = {};
 
 userController.register = catchAsync(async (req, res, next) => {
   //Get data from request
-  const { name, email, password } = req.body;
+  let { name, email, password } = req.body;
   //Business Logic Validation
   let user = await User.findOne({ email });
   if (user)
@@ -149,6 +148,35 @@ userController.updateProfile = catchAsync(async (req, res, next) => {
     { user },
     null,
     "Update profile successfully"
+  );
+});
+
+userController.deleteUser = catchAsync(async (req, res, next) => {
+  //Get data from request
+  const currentUserId = req.userId;
+  const userId = req.params.id;
+  //Business Logic Validation
+  let user = await User.findOneAndUpdate(
+    { _id: currentUserId },
+    { isDeleted: true },
+    { new: true }
+  );
+
+  if (!user)
+    throw new AppError(
+      400,
+      "User not found or User is not authorized",
+      "Delete User Error"
+    );
+
+  //Response
+  return sendResponse(
+    res,
+    200,
+    true,
+    { user },
+    null,
+    "Delete user successfully"
   );
 });
 
