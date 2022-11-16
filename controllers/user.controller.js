@@ -1,6 +1,8 @@
 const { sendResponse, AppError, catchAsync } = require("../helpers/utils.js");
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const Job = require("../models/Job");
+const Bid = require("../models/Bid");
 const bcrypt = require("bcryptjs");
 
 const userController = {};
@@ -100,19 +102,37 @@ userController.getCurrentUserBids = catchAsync(async (req, res, next) => {
   //Get data from request
   const currentUserId = req.userId;
   //Business Logic Validation
-  const user = await User.findById(currentUserId);
-  if (!user) throw new AppError(400, "User not found", "Get User Bids Error");
-
-  const userBids = user.bids;
+  const myBids = await Bid.find({ bidder: currentUserId });
+  if (!myBids)
+    throw new AppError(400, "No bids found", "Get Current User Bids Error");
 
   //Response
   return sendResponse(
     res,
     200,
     true,
-    { userBids },
+    { myBids },
     null,
     "Get user bids successfully"
+  );
+});
+
+userController.getCurrentUserJobs = catchAsync(async (req, res, next) => {
+  //Get data from request
+  const currentUserId = req.userId;
+  //Business Logic Validation
+  const myJobs = await Job.find({ lister: currentUserId });
+  if (!myJobs)
+    throw new AppError(400, "No jobs found", "Get Current User Jobs Error");
+
+  //Response
+  return sendResponse(
+    res,
+    200,
+    true,
+    { myJobs },
+    null,
+    "Get user jobs successfully"
   );
 });
 
@@ -154,7 +174,6 @@ userController.updateProfile = catchAsync(async (req, res, next) => {
 userController.deleteUser = catchAsync(async (req, res, next) => {
   //Get data from request
   const currentUserId = req.userId;
-  const userId = req.params.id;
   //Business Logic Validation
   let user = await User.findOneAndUpdate(
     { _id: currentUserId },

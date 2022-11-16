@@ -119,7 +119,14 @@ jobController.updateJob = catchAsync(async (req, res, next) => {
     throw new AppError(400, "Only lister can edit job", "Update Job Error");
 
   //Process
-  const allows = ["title", "industry", "description", "skills", "image"];
+  const allows = [
+    "title",
+    "industry",
+    "description",
+    "skills",
+    "image",
+    "status",
+  ];
   allows.forEach((field) => {
     if (req.body[field] !== undefined) {
       job[field] = req.body[field];
@@ -136,7 +143,7 @@ jobController.deleteJob = catchAsync(async (req, res, next) => {
   const jobId = req.params.id;
   //Business Logic Validation
   let job = await Job.findOneAndUpdate(
-    { _id: postId, lister: currentUserId },
+    { _id: jobId, lister: currentUserId },
     { isDeleted: true },
     { new: true }
   );
@@ -147,7 +154,7 @@ jobController.deleteJob = catchAsync(async (req, res, next) => {
       "Job not found or User is not authorized",
       "Delete Job Error"
     );
-  await calculatePostCount(currentUserId);
+  await calculateJobListingCount(currentUserId);
 
   //Response
   return sendResponse(res, 200, true, { job }, null, "Delete job successfully");

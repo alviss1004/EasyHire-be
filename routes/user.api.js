@@ -6,6 +6,7 @@ const {
   getMyProfile,
   getSingleUser,
   getCurrentUserBids,
+  getCurrentUserJobs,
   updateProfile,
   deleteUser,
 } = require("../controllers/user.controller.js");
@@ -64,19 +65,20 @@ router.get(
 );
 
 /**
+ * @route GET /users/me/jobs
+ * @description Get all job listings of current user
+ * @body
+ * @access login required
+ */
+router.get("/me/jobs", authentication.loginRequired, getCurrentUserJobs);
+
+/**
  * @route GET /users/me/bids
  * @description Get all bids of current user
  * @body
  * @access login required
  */
-router.get(
-  "/me/bids",
-  authentication.loginRequired,
-  validators.validate([
-    param("id").exists().isString().custom(validators.checkObjectId),
-  ]),
-  getCurrentUserBids
-);
+router.get("/me/bids", authentication.loginRequired, getCurrentUserBids);
 
 /**
  * @route PUT /users/:id

@@ -1,15 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const validators = require("../middlewares/validators.js");
-const {} = require("../controllers/review.controller.js");
-
-/**
- * @route GET /reviews/:userId
- * @description Get all reviews of a user
- * @body
- * @access login required
- */
+const authentication = require("../middlewares/authentication.js");
+const {
+  getUserReviews,
+  createReview,
+} = require("../controllers/review.controller.js");
 
 /**
  * @route POST /reviews/:jobId
@@ -17,6 +14,15 @@ const {} = require("../controllers/review.controller.js");
  * @body {rating, comment}
  * @access login required
  */
+router.post(
+  "/:jobId",
+  authentication.loginRequired,
+  validators.validate([body("rating", "Invalid rating").exists().notEmpty()]),
+  validators.validate([
+    param("jobId").exists().isString().custom(validators.checkObjectId),
+  ]),
+  createReview
+);
 
 //export
 module.exports = router;

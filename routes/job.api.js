@@ -70,7 +70,7 @@ router.post(
 /**
  * @route PUT /jobs/:id
  * @description Edit a listed job
- * @body {title, industry, description, skills, image}
+ * @body {title, industry, description, imageUrl}
  * @access login required
  */
 router.put(

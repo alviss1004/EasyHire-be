@@ -16,9 +16,12 @@ const authentication = require("../middlewares/authentication.js");
  * @access login required
  */
 router.post(
-  "/",
+  "/:jobId",
   authentication.loginRequired,
   validators.validate([body("price", "Invalid price").exists().notEmpty()]),
+  validators.validate([
+    param("jobId").exists().isString().custom(validators.checkObjectId),
+  ]),
   createBid
 );
 

@@ -16,9 +16,11 @@ const userSchema = mongoose.Schema(
     industry: { type: String, required: false, default: "" },
     skills: [{ type: String, required: false, default: "" }],
 
+    reviews: [{ type: mongoose.SchemaTypes.ObjectId, ref: "Review" }],
+
     isDeleted: { type: Boolean, default: false, select: false },
+
     jobListingCount: { type: Number, default: 0 },
-    reviewCount: { type: Number, default: 0 },
   },
   {
     timestamps: true,
