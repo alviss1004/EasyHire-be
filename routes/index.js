@@ -26,4 +26,8 @@ router.use("/bids", bidApi);
 const reviewApi = require("./review.api");
 router.use("/reviews", reviewApi);
 
+//commentApi
+const commentApi = require("./comment.api");
+router.use("/comments", commentApi);
+
 module.exports = router;

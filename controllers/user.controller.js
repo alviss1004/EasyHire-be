@@ -152,7 +152,11 @@ userController.updateProfile = catchAsync(async (req, res, next) => {
     "aboutMe",
     "company",
     "industry",
-    "skills",
+    "jobTitle",
+    "facebookLink",
+    "instagramLink",
+    "linkedinLink",
+    "twitterLink",
   ];
   allows.forEach((field) => {
     if (req.body[field] !== undefined) {

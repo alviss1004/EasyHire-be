@@ -16,7 +16,7 @@ const calculateJobListingCount = async (userId) => {
 
 jobController.createJob = catchAsync(async (req, res, next) => {
   //Get data from request
-  const { title, industry, description, skills, image } = req.body;
+  const { title, industry, description, image } = req.body;
   const currentUserId = req.userId;
   //Business Logic Validation
   let job = await Job.create({
@@ -24,7 +24,6 @@ jobController.createJob = catchAsync(async (req, res, next) => {
     title,
     industry,
     description,
-    skills,
     image,
   });
   await calculateJobListingCount(currentUserId);
@@ -119,14 +118,7 @@ jobController.updateJob = catchAsync(async (req, res, next) => {
     throw new AppError(400, "Only lister can edit job", "Update Job Error");
 
   //Process
-  const allows = [
-    "title",
-    "industry",
-    "description",
-    "skills",
-    "image",
-    "status",
-  ];
+  const allows = ["title", "industry", "description", "image", "status"];
   allows.forEach((field) => {
     if (req.body[field] !== undefined) {
       job[field] = req.body[field];

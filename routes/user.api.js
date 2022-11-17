@@ -83,7 +83,7 @@ router.get("/me/bids", authentication.loginRequired, getCurrentUserBids);
 /**
  * @route PUT /users/:id
  * @description Update user profile
- * @body {name, isFreelancer, industry, company, skills, avatarUrl, about me}
+ * @body {name, isFreelancer, industry, company, avatarUrl, about me, jobTitle, facebookLink,instagramLink,linkedinLink,twitterLink,
  * @access login required
  */
 router.put(

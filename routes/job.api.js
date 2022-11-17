@@ -14,7 +14,7 @@ const authentication = require("../middlewares/authentication.js");
 
 /**
  * @route GET /jobs?page=1&limit=10
- * @description Get job list with pagination and skills/industry in query (optional)
+ * @description Get job list with pagination and industry in query (optional)
  * @body
  * @access public
  */
@@ -53,7 +53,7 @@ router.get(
 /**
  * @route POST /jobs
  * @description List a new job
- * @body {title, industry, description, skills, image}
+ * @body {title, industry, description, image}
  * @access login required
  */
 router.post(

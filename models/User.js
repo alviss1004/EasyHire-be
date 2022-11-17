@@ -13,8 +13,12 @@ const userSchema = mongoose.Schema(
     avatarUrl: { type: String, required: false, default: "" },
     aboutMe: { type: String, required: false, default: "" },
     company: { type: String, required: false, default: "" },
+    jobTitle: { type: String, required: false, default: "" },
     industry: { type: String, required: false, default: "" },
-    skills: [{ type: String, required: false, default: "" }],
+    facebookLink: [{ type: String, required: false, default: "" }],
+    instagramLink: [{ type: String, required: false, default: "" }],
+    linkedinLink: [{ type: String, required: false, default: "" }],
+    twitterLink: [{ type: String, required: false, default: "" }],
 
     reviews: [{ type: mongoose.SchemaTypes.ObjectId, ref: "Review" }],
 
