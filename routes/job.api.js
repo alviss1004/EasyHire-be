@@ -4,6 +4,7 @@ const { body, param } = require("express-validator");
 const validators = require("../middlewares/validators.js");
 const {
   getJobs,
+  getLatestJobs,
   getJobDetail,
   getJobBids,
   createJob,
@@ -19,6 +20,14 @@ const authentication = require("../middlewares/authentication.js");
  * @access public
  */
 router.get("/", getJobs);
+
+/**
+ * @route GET /jobs/latest
+ * @description Get 5 latest jobs
+ * @body
+ * @access public
+ */
+router.get("/latest", getLatestJobs);
 
 /**
  * @route GET /jobs/:id

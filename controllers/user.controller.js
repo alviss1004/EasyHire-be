@@ -44,9 +44,9 @@ userController.getFreelancers = catchAsync(async (req, res, next) => {
   const totalPages = Math.ceil(count / limit);
 
   let freelancers = await User.find({ isFreelancer: true })
-    .sort({ createdAt: -1 })
     .skip(offset)
-    .limit(limit);
+    .limit(limit)
+    .populate("reviews");
   if (!freelancers)
     throw new AppError(400, "No freelancer found", "Get freelancers error");
 

@@ -71,6 +71,25 @@ jobController.getJobs = catchAsync(async (req, res, next) => {
   );
 });
 
+jobController.getLatestJobs = catchAsync(async (req, res, next) => {
+  //Business Logic Validation & Process
+  let jobs = await Job.find()
+    .sort({ createdAt: -1 })
+    .limit(5)
+    .populate("lister");
+  if (!jobs) throw new AppError(400, "No job found", "Get Latest Jobs Error");
+
+  //Response
+  return sendResponse(
+    res,
+    200,
+    true,
+    { jobs },
+    null,
+    "Get latest jobs successfully"
+  );
+});
+
 jobController.getJobDetail = catchAsync(async (req, res, next) => {
   //Get data from request
   const jobId = req.params.id;

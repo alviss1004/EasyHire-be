@@ -35,7 +35,7 @@ reviewController.createReview = catchAsync(async (req, res, next) => {
   });
   //Adding this review to review list of the user who did the target job
   let user = await User.findById(targetJob.assignee);
-  user.reviews.push(review);
+  user.reviews.push(review._id);
   await user.save();
 
   //Response
