@@ -1,6 +1,5 @@
 const User = require("./models/User");
 const Job = require("./models/Job");
-const mongoose = require("mongoose");
 var { faker } = require("@faker-js/faker");
 
 /*Code to generate new random jobs for frontend testing purposes*/

@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   register,
   getFreelancers,
+  getFeaturedFreelancers,
   getMyProfile,
   getSingleUser,
   getCurrentUserBids,
@@ -40,6 +41,14 @@ router.post(
  * @access public
  */
 router.get("/freelancers", getFreelancers);
+
+/**
+ * @route GET /users/freelancers/featured
+ * @description Get all featured freelancers
+ * @body
+ * @access public
+ */
+router.get("/freelancers/featured", getFeaturedFreelancers);
 
 /**
  * @route GET /users/me
@@ -83,7 +92,7 @@ router.get("/me/bids", authentication.loginRequired, getCurrentUserBids);
 /**
  * @route PUT /users/:id
  * @description Update user profile
- * @body {name, isFreelancer, industry, company, avatarUrl, about me, jobTitle, 
+ * @body {name, isFreelancer, industry, company, avatarUrl, about me, jobTitle,
  * facebookLink,instagramLink,linkedinLink,twitterLink}
  * @access login required
  */

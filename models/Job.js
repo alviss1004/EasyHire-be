@@ -18,11 +18,13 @@ const jobSchema = mongoose.Schema(
       require: true,
     },
     assignee: { type: mongoose.SchemaTypes.ObjectId, ref: "User" },
-    bidders: [{ type: mongoose.SchemaTypes.ObjectId, ref: "User" }],
+    bids: [{ type: mongoose.SchemaTypes.ObjectId, ref: "Bid" }],
 
     isDeleted: { type: Boolean, default: false, select: false },
 
     bidCount: { type: Number, default: 0 },
+    highestBid: { type: Number, default: 0 },
+    averageBid: { type: Number, default: 0 },
   },
   {
     timestamps: true,

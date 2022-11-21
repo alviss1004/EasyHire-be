@@ -25,6 +25,7 @@ const userSchema = mongoose.Schema(
     isDeleted: { type: Boolean, default: false, select: false },
 
     jobListingCount: { type: Number, default: 0 },
+    rating: { type: Number, default: 0 },
   },
   {
     timestamps: true,

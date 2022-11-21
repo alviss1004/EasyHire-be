@@ -12,6 +12,24 @@ const calculateBidCount = async (jobId) => {
   });
   await Job.findByIdAndUpdate(jobId, { bidCount });
 };
+//Calculate highest bid on a job
+const calculateHighestBid = async (jobId, newBid) => {
+  const job = await Job.findById(jobId);
+  if (job.highestBid === 0 || newBid > job.highestBid) {
+    await Job.findByIdAndUpdate(jobId, { highestBid: newBid });
+  }
+};
+//Calculate average bid on a job
+const calculateAverageBid = async (jobId, newBid) => {
+  const job = await Job.findById(jobId);
+  if (job.averageBid === 0) {
+    await Job.findByIdAndUpdate(jobId, { averageBid: newBid });
+  } else {
+    const averageBid =
+      (job.averageBid * job.bids.length + newBid) / (job.bids.length + 1);
+    await Job.findfindByIdAndUpdate(jobId, { averageBid });
+  }
+};
 
 bidController.createBid = catchAsync(async (req, res, next) => {
   //Get data from request
@@ -33,14 +51,24 @@ bidController.createBid = catchAsync(async (req, res, next) => {
       "User cannot bid on their own job listings",
       "Create Bid Error"
     );
+  //Checking if user is bidding on an ongoing/finished job
+  if (targetJob.status === "ongoing" || targetJob.status === "finished")
+    throw new AppError(
+      400,
+      "User cannot bid on ongoing or finished jobs",
+      "Create Bid Error"
+    );
   //Create bid after validation
   let bid = await Bid.create({
     bidder: currentUserId,
     targetJob: targetJobId,
     price,
   });
+  //Calculate new highest bid and average bid
+  calculateHighestBid(targetJobId, bid.price);
+  calculateAverageBid(targetJobId, bid.price);
   //Adding current user to bidders list of target job
-  targetJob.bidders.push(currentUserId);
+  targetJob.bids.push(bid);
   await calculateBidCount(targetJobId);
   await targetJob.save();
   //Response

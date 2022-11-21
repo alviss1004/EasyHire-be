@@ -46,7 +46,7 @@ userController.getFreelancers = catchAsync(async (req, res, next) => {
   let freelancers = await User.find({ isFreelancer: true })
     .skip(offset)
     .limit(limit)
-    .populate("reviews");
+    .populate({ path: "reviews", populate: { path: "author" } });
   if (!freelancers)
     throw new AppError(400, "No freelancer found", "Get freelancers error");
 
@@ -61,11 +61,34 @@ userController.getFreelancers = catchAsync(async (req, res, next) => {
   );
 });
 
+userController.getFeaturedFreelancers = catchAsync(async (req, res, next) => {
+  //Business Logic Validation & Process
+  let freelancers = await User.find({ isFreelancer: true })
+    .limit(10)
+    .sort({ rating: -1 });
+  if (!freelancers)
+    throw new AppError(
+      400,
+      "No freelancer found",
+      "Get featured freelancers error"
+    );
+
+  //Response
+  return sendResponse(
+    res,
+    200,
+    true,
+    { freelancers },
+    null,
+    "Get featured freelancers successfully"
+  );
+});
+
 userController.getMyProfile = catchAsync(async (req, res, next) => {
   //Get data from request
   const currentUserId = req.userId;
   //Business Logic Validation
-  const user = await User.findById(currentUserId);
+  const user = await User.findById(currentUserId).populate("reviews");
   if (!user)
     throw new AppError(400, "User not found", "Get current user error");
 
@@ -84,7 +107,7 @@ userController.getSingleUser = catchAsync(async (req, res, next) => {
   //Get data from request
   const userId = req.params.id;
   //Business Logic Validation
-  const user = await User.findById(userId);
+  const user = await User.findById(userId).populate("reviews");
   if (!user) throw new AppError(400, "User not found", "Get single user error");
 
   //Response

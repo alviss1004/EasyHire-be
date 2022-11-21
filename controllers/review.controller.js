@@ -6,6 +6,18 @@ const Review = require("../models/Review");
 
 const reviewController = {};
 
+const calculateUserRating = async (userId, newRating) => {
+  const user = await User.findById(userId);
+  if (user.reviews.length === 0) {
+    await User.findByIdAndUpdate(userId, { rating: newRating });
+  } else {
+    const rating =
+      (user.rating * user.reviews.length + newRating) /
+      (user.reviews.length + 1);
+    await User.findByIdAndUpdate(userId, { rating });
+  }
+};
+
 reviewController.createReview = catchAsync(async (req, res, next) => {
   //Get data from request
   const { rating, comment } = req.body;
@@ -33,6 +45,8 @@ reviewController.createReview = catchAsync(async (req, res, next) => {
     rating,
     comment,
   });
+  //Calculate user new rating
+  calculateUserRating(targetJob.assignee, review.rating);
   //Adding this review to review list of the user who did the target job
   let user = await User.findById(targetJob.assignee);
   user.reviews.push(review._id);

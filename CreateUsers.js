@@ -1,6 +1,5 @@
 const bcrypt = require("bcryptjs/dist/bcrypt");
 const User = require("./models/User");
-const mongoose = require("mongoose");
 var { faker } = require("@faker-js/faker");
 
 /*Code to generate new random users for frontend testing purposes*/
@@ -44,5 +43,3 @@ const createUsers = async (numberOfUser) => {
   }
 };
 createUsers(100);
-
-module.exports = createUsers;

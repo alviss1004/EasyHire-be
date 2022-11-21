@@ -94,7 +94,7 @@ jobController.getJobDetail = catchAsync(async (req, res, next) => {
   //Get data from request
   const jobId = req.params.id;
   //Business Logic Validation
-  const job = await Job.findById(jobId);
+  const job = await Job.findById(jobId).populate("lister");
   if (!job) throw new AppError(400, "Job not found", "Get Job Detail Error");
 
   //Response
