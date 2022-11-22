@@ -107,7 +107,10 @@ userController.getSingleUser = catchAsync(async (req, res, next) => {
   //Get data from request
   const userId = req.params.id;
   //Business Logic Validation
-  const user = await User.findById(userId).populate("reviews");
+  const user = await User.findById(userId).populate({
+    path: "reviews",
+    populate: { path: "author" },
+  });
   if (!user) throw new AppError(400, "User not found", "Get single user error");
 
   //Response

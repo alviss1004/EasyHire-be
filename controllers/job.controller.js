@@ -37,24 +37,46 @@ jobController.getJobs = catchAsync(async (req, res, next) => {
   let { page, limit, ...filter } = { ...req.query };
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
-
+  console.log("SORTBY", filter.sortBy);
   //Business Logic Validation & Process
   const filterConditions = [{ isDeleted: false }];
-  if (filter.industry) {
+  //Check for filter by industry
+  if (filter.industry && filter.industry !== "All") {
     filterConditions.push({
       industry: { $regex: filter.industry, $options: "i" },
+    });
+  }
+  //Check for search query
+  if (filter.search) {
+    filterConditions.push({
+      $or: [
+        { title: { $regex: filter.search, $options: "i" } },
+        { description: { $regex: filter.search, $options: "i" } },
+      ],
     });
   }
   const filterCriteria = filterConditions.length
     ? { $and: filterConditions }
     : {};
+  //Check for sort by
+  let sort;
+  if (filter.sortBy === "newest") {
+    sort = { createdAt: -1 };
+  } else if (filter.sortBy === "highestBidAsc") {
+    sort = { highestBid: 1 };
+  } else if (filter.sortBy === "highestBidDesc") {
+    sort = { highestBid: -1 };
+  } else if (filter.sortBy === "averageBidAsc") {
+    sort = { averageBid: 1 };
+  } else {
+    sort = { averageBid: -1 };
+  }
 
   const count = await Job.countDocuments(filterCriteria);
   const offset = limit * (page - 1);
   const totalPages = Math.ceil(count / limit);
-
   let jobs = await Job.find(filterCriteria)
-    .sort({ createdAt: -1 })
+    .sort(sort)
     .skip(offset)
     .limit(limit)
     .populate("lister");
