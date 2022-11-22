@@ -60,7 +60,7 @@ jobController.getJobs = catchAsync(async (req, res, next) => {
     : {};
   //Check for sort by
   let sort;
-  if (filter.sortBy === "newest") {
+  if (filter.sortBy === "newest" || filter.sortBy === "Newest") {
     sort = { createdAt: -1 };
   } else if (filter.sortBy === "highestBidAsc") {
     sort = { highestBid: 1 };
@@ -116,7 +116,7 @@ jobController.getJobDetail = catchAsync(async (req, res, next) => {
   //Get data from request
   const jobId = req.params.id;
   //Business Logic Validation
-  const job = await Job.findById(jobId).populate("lister");
+  const job = await Job.findById(jobId).populate("lister").populate("bids");
   if (!job) throw new AppError(400, "Job not found", "Get Job Detail Error");
 
   //Response

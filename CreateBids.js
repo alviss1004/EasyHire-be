@@ -51,6 +51,7 @@ const createBids = async (numberOfBid) => {
     calculateAverageBid(newBid.targetJob, newBid.price);
     //Adding current user to bidders list of target job
     targetJob.bids.push(newBid);
+    targetJob.bidders.push(targetJob.bidder);
     await calculateBidCount(newBid.targetJob);
     await targetJob.save();
   }

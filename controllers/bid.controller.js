@@ -27,7 +27,7 @@ const calculateAverageBid = async (jobId, newBid) => {
   } else {
     const averageBid =
       (job.averageBid * job.bids.length + newBid) / (job.bids.length + 1);
-    await Job.findfindByIdAndUpdate(jobId, { averageBid });
+    await Job.findByIdAndUpdate(jobId, { averageBid });
   }
 };
 
@@ -38,12 +38,13 @@ bidController.createBid = catchAsync(async (req, res, next) => {
   const targetJobId = req.params.jobId;
   //Checking if user already had a bid on this job
   let targetJob = await Job.findById(targetJobId);
-  if (targetJob.bidders.includes(currentUserId))
+  if (targetJob.toJSON().bidders.includes(currentUserId))
     throw new AppError(
       400,
       "User can only bid once per job",
       "Create Bid Error"
     );
+
   //Checking if user is bidding on their own jobs
   if (targetJob.lister.equals(currentUserId))
     throw new AppError(
@@ -69,6 +70,7 @@ bidController.createBid = catchAsync(async (req, res, next) => {
   calculateAverageBid(targetJobId, bid.price);
   //Adding current user to bidders list of target job
   targetJob.bids.push(bid);
+  targetJob.bidders.push(currentUserId);
   await calculateBidCount(targetJobId);
   await targetJob.save();
   //Response

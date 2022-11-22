@@ -128,7 +128,9 @@ userController.getCurrentUserBids = catchAsync(async (req, res, next) => {
   //Get data from request
   const currentUserId = req.userId;
   //Business Logic Validation
-  const myBids = await Bid.find({ bidder: currentUserId });
+  const myBids = await Bid.find({ bidder: currentUserId }).populate(
+    "targetJob"
+  );
   if (!myBids)
     throw new AppError(400, "No bids found", "Get Current User Bids Error");
 
