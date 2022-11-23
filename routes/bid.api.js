@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   createBid,
   acceptBid,
+  declineBid,
   deleteBid,
 } = require("../controllers/bid.controller.js");
 const { body, param } = require("express-validator");
@@ -38,6 +39,21 @@ router.put(
     param("id").exists().isString().custom(validators.checkObjectId),
   ]),
   acceptBid
+);
+
+/**
+ * @route DELETE /bids/decline/:id
+ * @description Decline a bid
+ * @body
+ * @access login required
+ */
+router.delete(
+  "/decline/:id",
+  authentication.loginRequired,
+  validators.validate([
+    param("id").exists().isString().custom(validators.checkObjectId),
+  ]),
+  declineBid
 );
 
 /**

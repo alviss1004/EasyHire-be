@@ -6,6 +6,7 @@ const Bid = require("../models/Bid");
 
 const jobController = {};
 
+//function to calculate new job listing count of user
 const calculateJobListingCount = async (userId) => {
   const jobListingCount = await Job.countDocuments({
     lister: userId,
@@ -57,7 +58,7 @@ jobController.getJobs = catchAsync(async (req, res, next) => {
   const filterCriteria = filterConditions.length
     ? { $and: filterConditions }
     : {};
-  //Check for sort by
+  //Check for value of sort and sort accordingly
   let sort;
   if (filter.sortBy === "newest" || filter.sortBy === "Newest") {
     sort = { createdAt: -1 };
@@ -71,6 +72,7 @@ jobController.getJobs = catchAsync(async (req, res, next) => {
     sort = { averageBid: -1 };
   }
 
+  //Get jobs based on pagination
   const count = await Job.countDocuments(filterCriteria);
   const offset = limit * (page - 1);
   const totalPages = Math.ceil(count / limit);
@@ -94,7 +96,7 @@ jobController.getJobs = catchAsync(async (req, res, next) => {
 
 jobController.getLatestJobs = catchAsync(async (req, res, next) => {
   //Business Logic Validation & Process
-  let jobs = await Job.find()
+  let jobs = await Job.find({ isDeleted: false, status: "bidding" })
     .sort({ createdAt: -1 })
     .limit(5)
     .populate("lister");
@@ -188,6 +190,10 @@ jobController.deleteJob = catchAsync(async (req, res, next) => {
       "Job not found or User is not authorized",
       "Delete Job Error"
     );
+
+  //Delete all bids on deleted job
+  await Bid.deleteMany({ targetJob: jobId });
+  //Calculate new listing count on user
   await calculateJobListingCount(currentUserId);
 
   //Response

@@ -23,7 +23,10 @@ const calculateHighestBid = async (jobId) => {
 const calculateAverageBid = async (jobId) => {
   const job = await Job.findById(jobId).populate("bids");
   const jobBids = job.bids.map((bid) => bid.price);
-  const averageBid = jobBids.reduce((a, b) => a + b, 0) / jobBids.length;
+  let averageBid = 0;
+  if (jobBids.length !== 0) {
+    averageBid = jobBids.reduce((a, b) => a + b, 0) / jobBids.length;
+  }
   await Job.findByIdAndUpdate(jobId, { averageBid });
 };
 
@@ -108,6 +111,34 @@ bidController.acceptBid = catchAsync(async (req, res, next) => {
   return sendResponse(res, 200, true, { bid }, null, "Accept bid successfully");
 });
 
+bidController.declineBid = catchAsync(async (req, res, next) => {
+  //Get data from request
+  const currentUserId = req.userId;
+  const bidId = req.params.id;
+  //Business Logic Validation
+  let bid = await Bid.findById(bidId).populate("targetJob");
+
+  if (!bid) throw new AppError(400, "Bid not found", "Delete Bid Error");
+  if (!bid.targetJob.lister.equals(currentUserId))
+    throw new AppError(400, "User is not authorized", "Delete Bid Error");
+  //Process
+  await Bid.findOneAndDelete({ _id: bidId });
+  //Also Removing bid from job's fields and calculate their new values
+  const job = await Job.findById(bid.targetJob._id);
+  const jobBids = job.bids;
+
+  job.bids = jobBids.filter((bid) => !bid.equals(bidId));
+  const jobBidders = job.bidders;
+  job.bidders = jobBidders.filter((bidder) => !bidder.equals(bid.bidder));
+  await job.save();
+  await calculateBidCount(job._id);
+  await calculateHighestBid(job._id);
+  await calculateAverageBid(job._id);
+
+  //Response
+  return sendResponse(res, 200, true, { bid }, null, "Delete bid successfully");
+});
+
 bidController.deleteBid = catchAsync(async (req, res, next) => {
   //Get data from request
   const currentUserId = req.userId;
@@ -128,6 +159,7 @@ bidController.deleteBid = catchAsync(async (req, res, next) => {
   //Removing bid from job and calculate new fields
   const job = await Job.findById(bid.targetJob._id);
   const jobBids = job.bids;
+
   job.bids = jobBids.filter((bid) => !bid.equals(bidId));
   const jobBidders = job.bidders;
   job.bidders = jobBidders.filter((bidder) => !bidder.equals(currentUserId));

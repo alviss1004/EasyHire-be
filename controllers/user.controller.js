@@ -43,7 +43,7 @@ userController.getFreelancers = catchAsync(async (req, res, next) => {
   const offset = limit * (page - 1);
   const totalPages = Math.ceil(count / limit);
 
-  let freelancers = await User.find({ isFreelancer: true })
+  let freelancers = await User.find({ isFreelancer: true, isDeleted: false })
     .skip(offset)
     .limit(limit)
     .populate({ path: "reviews", populate: { path: "author" } });
@@ -63,7 +63,7 @@ userController.getFreelancers = catchAsync(async (req, res, next) => {
 
 userController.getFeaturedFreelancers = catchAsync(async (req, res, next) => {
   //Business Logic Validation & Process
-  let freelancers = await User.find({ isFreelancer: true })
+  let freelancers = await User.find({ isFreelancer: true, isDeleted: false })
     .limit(10)
     .sort({ rating: -1 });
   if (!freelancers)
@@ -149,7 +149,9 @@ userController.getCurrentUserJobs = catchAsync(async (req, res, next) => {
   //Get data from request
   const currentUserId = req.userId;
   //Business Logic Validation
-  const myJobs = await Job.find({ lister: currentUserId });
+  const myJobs = await Job.find({ lister: currentUserId }).sort({
+    createdAt: -1,
+  });
   if (!myJobs)
     throw new AppError(400, "No jobs found", "Get Current User Jobs Error");
 
