@@ -46,7 +46,7 @@ reviewController.createReview = catchAsync(async (req, res, next) => {
     comment,
   });
   //Calculate user new rating
-  calculateUserRating(targetJob.assignee, review.rating);
+  await calculateUserRating(targetJob.assignee, review.rating);
   //Adding this review to review list of the user who did the target job
   let user = await User.findById(targetJob.assignee);
   user.reviews.push(review._id);

@@ -12,22 +12,18 @@ const calculateBidCount = async (jobId) => {
   await Job.findByIdAndUpdate(jobId, { bidCount });
 };
 //Calculate highest bid on a job
-const calculateHighestBid = async (jobId, newBid) => {
-  const job = await Job.findById(jobId);
-  if (job.highestBid === 0 || newBid > job.highestBid) {
-    await Job.findByIdAndUpdate(jobId, { highestBid: newBid });
-  }
+const calculateHighestBid = async (jobId) => {
+  const job = await Job.findById(jobId).populate("bids");
+  const jobBids = job.bids.map((bid) => bid.price);
+  const highestBid = Math.max(...jobBids);
+  await Job.findByIdAndUpdate(jobId, { highestBid });
 };
 //Calculate average bid on a job
-const calculateAverageBid = async (jobId, newBid) => {
-  const job = await Job.findById(jobId);
-  if (job.averageBid === 0) {
-    await Job.findByIdAndUpdate(jobId, { averageBid: newBid });
-  } else {
-    const averageBid =
-      (job.averageBid / job.bids.length + newBid) / (job.bids.length + 1);
-    await Job.findByIdAndUpdate(jobId, { averageBid });
-  }
+const calculateAverageBid = async (jobId) => {
+  const job = await Job.findById(jobId).populate("bids");
+  const jobBids = job.bids.map((bid) => bid.price);
+  const averageBid = jobBids.reduce((a, b) => a + b, 0) / jobBids.length;
+  await Job.findByIdAndUpdate(jobId, { averageBid });
 };
 
 const createBids = async (numberOfBid) => {
@@ -47,13 +43,14 @@ const createBids = async (numberOfBid) => {
     let newBid = await Bid.create(singleBid);
 
     let targetJob = await Job.findById(newBid.targetJob);
-    calculateHighestBid(newBid.targetJob, newBid.price);
-    calculateAverageBid(newBid.targetJob, newBid.price);
+
     //Adding current user to bidders list of target job
-    targetJob.bids.push(newBid);
-    targetJob.bidders.push(targetJob.bidder);
+    targetJob.bids.push(newBid._id);
+    targetJob.bidders.push(newBid.bidder);
     await calculateBidCount(newBid.targetJob);
     await targetJob.save();
+    await calculateHighestBid(newBid.targetJob);
+    await calculateAverageBid(newBid.targetJob);
   }
 };
 createBids(400);

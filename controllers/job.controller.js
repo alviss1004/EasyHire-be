@@ -37,9 +37,8 @@ jobController.getJobs = catchAsync(async (req, res, next) => {
   let { page, limit, ...filter } = { ...req.query };
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
-  console.log("SORTBY", filter.sortBy);
   //Business Logic Validation & Process
-  const filterConditions = [{ isDeleted: false }];
+  const filterConditions = [{ isDeleted: false, status: "bidding" }];
   //Check for filter by industry
   if (filter.industry && filter.industry !== "All") {
     filterConditions.push({
@@ -116,7 +115,9 @@ jobController.getJobDetail = catchAsync(async (req, res, next) => {
   //Get data from request
   const jobId = req.params.id;
   //Business Logic Validation
-  const job = await Job.findById(jobId).populate("lister").populate("bids");
+  const job = await Job.findById(jobId)
+    .populate("lister")
+    .populate({ path: "bids", populate: { path: "bidder" } });
   if (!job) throw new AppError(400, "Job not found", "Get Job Detail Error");
 
   //Response

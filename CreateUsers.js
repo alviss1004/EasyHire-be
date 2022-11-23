@@ -28,7 +28,7 @@ const createUsers = async (numberOfUser) => {
       email: faker.internet.email(),
       password,
       isFreelancer: Math.round(Math.random()),
-      avatarUrl: faker.internet.avatar(),
+      avatarUrl: faker.image.avatar(),
       industry: industries[Math.floor(Math.random() * 9)],
       company: faker.company.name(),
       jobTitle: faker.name.jobTitle(),

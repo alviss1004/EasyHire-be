@@ -13,22 +13,18 @@ const calculateBidCount = async (jobId) => {
   await Job.findByIdAndUpdate(jobId, { bidCount });
 };
 //Calculate highest bid on a job
-const calculateHighestBid = async (jobId, newBid) => {
-  const job = await Job.findById(jobId);
-  if (job.highestBid === 0 || newBid > job.highestBid) {
-    await Job.findByIdAndUpdate(jobId, { highestBid: newBid });
-  }
+const calculateHighestBid = async (jobId) => {
+  const job = await Job.findById(jobId).populate("bids");
+  const jobBids = job.bids.map((bid) => bid.price);
+  const highestBid = Math.max(...jobBids);
+  await Job.findByIdAndUpdate(jobId, { highestBid });
 };
 //Calculate average bid on a job
-const calculateAverageBid = async (jobId, newBid) => {
-  const job = await Job.findById(jobId);
-  if (job.averageBid === 0) {
-    await Job.findByIdAndUpdate(jobId, { averageBid: newBid });
-  } else {
-    const averageBid =
-      (job.averageBid * job.bids.length + newBid) / (job.bids.length + 1);
-    await Job.findByIdAndUpdate(jobId, { averageBid });
-  }
+const calculateAverageBid = async (jobId) => {
+  const job = await Job.findById(jobId).populate("bids");
+  const jobBids = job.bids.map((bid) => bid.price);
+  const averageBid = jobBids.reduce((a, b) => a + b, 0) / jobBids.length;
+  await Job.findByIdAndUpdate(jobId, { averageBid });
 };
 
 bidController.createBid = catchAsync(async (req, res, next) => {
@@ -36,6 +32,13 @@ bidController.createBid = catchAsync(async (req, res, next) => {
   const { price } = req.body;
   const currentUserId = req.userId;
   const targetJobId = req.params.jobId;
+  //Checking if bid price is negative
+  if (price < 0)
+    throw new AppError(
+      400,
+      "Bid price cannot be lower than 0",
+      "Create Bid Error"
+    );
   //Checking if user already had a bid on this job
   let targetJob = await Job.findById(targetJobId);
   if (targetJob.toJSON().bidders.includes(currentUserId))
@@ -65,14 +68,14 @@ bidController.createBid = catchAsync(async (req, res, next) => {
     targetJob: targetJobId,
     price,
   });
-  //Calculate new highest bid and average bid
-  calculateHighestBid(targetJobId, bid.price);
-  calculateAverageBid(targetJobId, bid.price);
   //Adding current user to bidders list of target job
-  targetJob.bids.push(bid);
+  targetJob.bids.push(bid._id);
   targetJob.bidders.push(currentUserId);
   await calculateBidCount(targetJobId);
   await targetJob.save();
+  //Calculate new highest bid and average bid
+  await calculateHighestBid(targetJobId);
+  await calculateAverageBid(targetJobId);
   //Response
   return sendResponse(res, 200, true, { bid }, null, "Create bid successfully");
 });
@@ -85,14 +88,19 @@ bidController.acceptBid = catchAsync(async (req, res, next) => {
   let bid = await Bid.findById(bidId).populate("bidder").populate("targetJob");
   if (!bid) throw new AppError(400, "Bid not found", "Accept Bid Error");
 
-  let targetJob = await Job.findById(bid.toJSON().targetJob);
+  let targetJob = await Job.findById(bid.targetJob._id);
   if (!targetJob.lister.equals(currentUserId))
     throw new AppError(400, "Only lister can accept bid", "Accept Bid Error");
 
   //Process
   bid.status = "accepted";
-  targetJob.assignee = bid.bidder;
+  targetJob.assignee = bid.bidder._id;
   targetJob.status = "ongoing";
+  //Delete all other bids on the job
+  targetJob.bids = bid._id;
+  targetJob.bidders = bid.bidder._id;
+  await Bid.deleteMany({ targetJob: targetJob._id, _id: { $ne: bidId } });
+
   await bid.save();
   await targetJob.save();
 
@@ -105,7 +113,9 @@ bidController.deleteBid = catchAsync(async (req, res, next) => {
   const currentUserId = req.userId;
   const bidId = req.params.id;
   //Business Logic Validation
-  let bid = await Bid.findOne({ _id: bidId, bidder: currentUserId });
+  let bid = await Bid.findOne({ _id: bidId, bidder: currentUserId }).populate(
+    "targetJob"
+  );
 
   if (!bid)
     throw new AppError(
@@ -113,11 +123,18 @@ bidController.deleteBid = catchAsync(async (req, res, next) => {
       "Bid not found or User is not authorized",
       "Delete Bid Error"
     );
-
-  const jobId = bid.toJSON().targetJob;
+  //Process
   await Bid.findOneAndDelete({ _id: bidId, bidder: currentUserId });
-
-  await calculateBidCount(jobId);
+  //Removing bid from job and calculate new fields
+  const job = await Job.findById(bid.targetJob._id);
+  const jobBids = job.bids;
+  job.bids = jobBids.filter((bid) => !bid.equals(bidId));
+  const jobBidders = job.bidders;
+  job.bidders = jobBidders.filter((bidder) => !bidder.equals(currentUserId));
+  await job.save();
+  await calculateBidCount(job._id);
+  await calculateHighestBid(job._id);
+  await calculateAverageBid(job._id);
 
   //Response
   return sendResponse(res, 200, true, { bid }, null, "Delete bid successfully");
