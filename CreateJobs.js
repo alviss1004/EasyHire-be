@@ -32,10 +32,9 @@ const createJobs = async (numberOfJob) => {
   for (let i = 0; i < numberOfJob; i++) {
     const singleJob = {
       lister: userIds[Math.floor(Math.random() * 100)],
-      industry: industries[Math.floor(Math.random() * 9)],
+      industry: industries[Math.floor(Math.random() * 10)],
       title: faker.name.jobTitle(),
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+      description: faker.lorem.paragraph(7),
     };
     await calculateJobListingCount(singleJob.lister);
 

@@ -119,6 +119,7 @@ jobController.getJobDetail = catchAsync(async (req, res, next) => {
   //Business Logic Validation
   const job = await Job.findById(jobId)
     .populate("lister")
+    .populate("assignee")
     .populate({ path: "bids", populate: { path: "bidder" } });
   if (!job) throw new AppError(400, "Job not found", "Get Job Detail Error");
 

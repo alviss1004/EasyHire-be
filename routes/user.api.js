@@ -6,8 +6,9 @@ const {
   getFeaturedFreelancers,
   getMyProfile,
   getSingleUser,
-  getCurrentUserBids,
-  getCurrentUserJobs,
+  getUserBids,
+  getUserJobListings,
+  getUserAssignedJobs,
   updateProfile,
   deleteUser,
 } = require("../controllers/user.controller.js");
@@ -79,7 +80,19 @@ router.get(
  * @body
  * @access login required
  */
-router.get("/me/jobs", authentication.loginRequired, getCurrentUserJobs);
+router.get("/me/jobs", authentication.loginRequired, getUserJobListings);
+
+/**
+ * @route GET /users/me/assignedJobs
+ * @description Get all job listings of current user
+ * @body
+ * @access login required
+ */
+router.get(
+  "/me/assignedJobs",
+  authentication.loginRequired,
+  getUserAssignedJobs
+);
 
 /**
  * @route GET /users/me/bids
@@ -87,7 +100,7 @@ router.get("/me/jobs", authentication.loginRequired, getCurrentUserJobs);
  * @body
  * @access login required
  */
-router.get("/me/bids", authentication.loginRequired, getCurrentUserBids);
+router.get("/me/bids", authentication.loginRequired, getUserBids);
 
 /**
  * @route PUT /users/:id

@@ -124,15 +124,14 @@ userController.getSingleUser = catchAsync(async (req, res, next) => {
   );
 });
 
-userController.getCurrentUserBids = catchAsync(async (req, res, next) => {
+userController.getUserBids = catchAsync(async (req, res, next) => {
   //Get data from request
   const currentUserId = req.userId;
   //Business Logic Validation
-  const myBids = await Bid.find({ bidder: currentUserId }).populate(
-    "targetJob"
-  );
-  if (!myBids)
-    throw new AppError(400, "No bids found", "Get Current User Bids Error");
+  const myBids = await Bid.find({ bidder: currentUserId })
+    .populate("targetJob")
+    .sort({ createdAt: -1 });
+  if (!myBids) throw new AppError(400, "No bids found", "Get User Bids Error");
 
   //Response
   return sendResponse(
@@ -145,15 +144,28 @@ userController.getCurrentUserBids = catchAsync(async (req, res, next) => {
   );
 });
 
-userController.getCurrentUserJobs = catchAsync(async (req, res, next) => {
+userController.getUserJobListings = catchAsync(async (req, res, next) => {
   //Get data from request
   const currentUserId = req.userId;
+  const jobStatus = req.query.status;
   //Business Logic Validation
-  const myJobs = await Job.find({ lister: currentUserId }).sort({
+  const filterConditions = [{ isDeleted: false, lister: currentUserId }];
+  //Check for status query
+  if (jobStatus) {
+    filterConditions.push({
+      status: { $regex: jobStatus, $options: "i" },
+    });
+  }
+
+  const filterCriteria = filterConditions.length
+    ? { $and: filterConditions }
+    : {};
+
+  const myJobs = await Job.find(filterCriteria).sort({
     createdAt: -1,
   });
   if (!myJobs)
-    throw new AppError(400, "No jobs found", "Get Current User Jobs Error");
+    throw new AppError(400, "No jobs found", "Get User Job Listings Error");
 
   //Response
   return sendResponse(
@@ -162,7 +174,31 @@ userController.getCurrentUserJobs = catchAsync(async (req, res, next) => {
     true,
     { myJobs },
     null,
-    "Get user jobs successfully"
+    "Get user job listings successfully"
+  );
+});
+
+userController.getUserAssignedJobs = catchAsync(async (req, res, next) => {
+  //Get data from request
+  const currentUserId = req.userId;
+  //Business Logic Validation
+  const assignedJobs = await Job.find({
+    isDeleted: false,
+    assignee: currentUserId,
+  })
+    .populate("lister")
+    .populate("bids");
+  if (!assignedJobs)
+    throw new AppError(400, "No jobs found", "Get User Assigned Jobs Error");
+
+  //Response
+  return sendResponse(
+    res,
+    200,
+    true,
+    { assignedJobs },
+    null,
+    "Get user assigned jobs successfully"
   );
 });
 
@@ -177,6 +213,7 @@ userController.updateProfile = catchAsync(async (req, res, next) => {
   if (!user) throw new AppError(400, "User not found", "Update User Error");
   //Process
   const allows = [
+    "name",
     "isFreelancer",
     "avatarUrl",
     "aboutMe",
