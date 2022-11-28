@@ -6,6 +6,7 @@ const authentication = require("../middlewares/authentication.js");
 const {
   createComment,
   getJobComments,
+  updateComment,
   deleteComment,
 } = require("../controllers/comment.controller.js");
 
@@ -31,7 +32,29 @@ router.post(
  * @body
  * @access public
  */
-router.get("/:jobId", authentication.loginRequired, getJobComments);
+router.get(
+  "/:jobId",
+  authentication.loginRequired,
+  validators.validate([
+    param("jobId").exists().isString().custom(validators.checkObjectId),
+  ]),
+  getJobComments
+);
+
+/**
+ * @route PUT /comments/:id
+ * @description Update a comment
+ * @body {content}
+ * @access login required
+ */
+router.put(
+  "/:id",
+  authentication.loginRequired,
+  validators.validate([
+    param("id").exists().isString().custom(validators.checkObjectId),
+  ]),
+  updateComment
+);
 
 /**
  * @route DELETE /comments/:id

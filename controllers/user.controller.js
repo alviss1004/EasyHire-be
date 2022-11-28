@@ -88,7 +88,10 @@ userController.getMyProfile = catchAsync(async (req, res, next) => {
   //Get data from request
   const currentUserId = req.userId;
   //Business Logic Validation
-  const user = await User.findById(currentUserId).populate("reviews");
+  const user = await User.findById(currentUserId).populate({
+    path: "reviews",
+    populate: { path: "author" },
+  });
   if (!user)
     throw new AppError(400, "User not found", "Get current user error");
 
@@ -130,7 +133,7 @@ userController.getUserBids = catchAsync(async (req, res, next) => {
   //Business Logic Validation
   const myBids = await Bid.find({ bidder: currentUserId })
     .populate("targetJob")
-    .sort({ createdAt: -1 });
+    .sort({ status: -1, createdAt: -1 });
   if (!myBids) throw new AppError(400, "No bids found", "Get User Bids Error");
 
   //Response

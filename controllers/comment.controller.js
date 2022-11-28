@@ -57,9 +57,43 @@ commentController.getJobComments = catchAsync(async (req, res, next) => {
     res,
     200,
     true,
-    { comments },
+    { comments, count, totalPages },
     null,
     "Get job comments successfully"
+  );
+});
+
+commentController.updateComment = catchAsync(async (req, res, next) => {
+  //Get data from request
+  const currentUserId = req.userId;
+  const commentId = req.params.id;
+  //Business Logic Validation
+  let comment = await Comment.findById(commentId);
+  if (!comment)
+    throw new AppError(400, "Comment not found", "Update Comment Error");
+  if (!comment.author.equals(currentUserId))
+    throw new AppError(
+      400,
+      "Only author can edit comment",
+      "Update Comment Error"
+    );
+
+  //Process
+  const allows = ["content"];
+  allows.forEach((field) => {
+    if (req.body[field] !== undefined) {
+      comment[field] = req.body[field];
+    }
+  });
+  await comment.save();
+  //Response
+  return sendResponse(
+    res,
+    200,
+    true,
+    { comment },
+    null,
+    "Update comment successfully"
   );
 });
 
