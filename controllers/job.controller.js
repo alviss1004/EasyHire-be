@@ -120,7 +120,8 @@ jobController.getJobDetail = catchAsync(async (req, res, next) => {
   const job = await Job.findById(jobId)
     .populate("lister")
     .populate({ path: "assignee", populate: { path: "reviews" } })
-    .populate({ path: "bids", populate: { path: "bidder" } });
+    .populate({ path: "bids", populate: { path: "bidder" } })
+    .populate("review");
   if (!job) throw new AppError(400, "Job not found", "Get Job Detail Error");
 
   //Response

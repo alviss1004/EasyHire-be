@@ -189,8 +189,10 @@ userController.getUserAssignedJobs = catchAsync(async (req, res, next) => {
     isDeleted: false,
     assignee: currentUserId,
   })
+    .sort({ createdAt: -1 })
     .populate("lister")
-    .populate("bids");
+    .populate("bids")
+    .populate("review");
   if (!assignedJobs)
     throw new AppError(400, "No jobs found", "Get User Assigned Jobs Error");
 
