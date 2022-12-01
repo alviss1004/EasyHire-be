@@ -17,7 +17,7 @@ const calculateJobListingCount = async (userId) => {
 
 jobController.createJob = catchAsync(async (req, res, next) => {
   //Get data from request
-  const { title, industry, description, image } = req.body;
+  const { title, industry, description } = req.body;
   const currentUserId = req.userId;
   //Business Logic Validation
   let job = await Job.create({
@@ -25,7 +25,6 @@ jobController.createJob = catchAsync(async (req, res, next) => {
     title,
     industry,
     description,
-    image,
   });
   await calculateJobListingCount(currentUserId);
 

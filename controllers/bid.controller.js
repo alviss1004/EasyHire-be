@@ -44,7 +44,7 @@ bidController.createBid = catchAsync(async (req, res, next) => {
     );
   //Checking if user already had a bid on this job
   let targetJob = await Job.findById(targetJobId);
-  if (targetJob.toJSON().bidders.includes(currentUserId))
+  if (targetJob.bidders.includes(currentUserId))
     throw new AppError(
       400,
       "User can only bid once per job",
