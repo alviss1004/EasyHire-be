@@ -3,10 +3,7 @@ const router = express.Router();
 const { body, param } = require("express-validator");
 const validators = require("../middlewares/validators.js");
 const authentication = require("../middlewares/authentication.js");
-const {
-  getUserReviews,
-  createReview,
-} = require("../controllers/review.controller.js");
+const { createReview } = require("../controllers/review.controller.js");
 
 /**
  * @route POST /reviews/:jobId
